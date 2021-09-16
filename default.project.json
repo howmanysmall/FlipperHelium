@@ -1,0 +1,16 @@
+{
+	"name": "HeliumAnimator",
+	"globIgnorePaths": [],
+
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"$ignoreUnknownInstances": true,
+			"HeliumAnimator": {
+				"$ignoreUnknownInstances": true,
+				"$path": "src"
+			}
+		}
+	}
+}
