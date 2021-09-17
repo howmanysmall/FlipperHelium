@@ -1,6 +1,6 @@
 # HeliumAnimator
 
-Based on Flipper.
+Based on [Flipper](https://github.com/Reselim/Flipper).
 
 ## Differences from Flipper
 
