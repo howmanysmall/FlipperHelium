@@ -60,7 +60,7 @@ function GroupMotor:Step(DeltaTime)
 
 	local AllMotorsComplete = true
 
-	for _, Motor in pairs(self[MotorsIndex]) do
+	for _, Motor in next, self[MotorsIndex] do
 		local Complete = Motor:Step(DeltaTime)
 		if not Complete then
 			-- If any of the sub-motors are incomplete, the group motor will not be complete either
@@ -85,8 +85,12 @@ end
 function GroupMotor:SetGoal(Goals)
 	self[CompleteIndex] = false
 
-	for Key, Goal in pairs(Goals) do
-		local Motor = assert(self[MotorsIndex][Key], string.format("Unknown motor for key %s", Key))
+	for Key, Goal in next, Goals do
+		local Motor = self[MotorsIndex][Key]
+		if not Motor then
+			error(string.format("Unknown motor for key %s", tostring(Key)))
+		end
+
 		Motor:SetGoal(Goal)
 	end
 
@@ -100,7 +104,7 @@ end
 function GroupMotor:GetValue()
 	local Values = {}
 
-	for Key, Motor in pairs(self[MotorsIndex]) do
+	for Key, Motor in next, self[MotorsIndex] do
 		Values[Key] = Motor:GetValue()
 	end
 
@@ -126,7 +130,7 @@ function GroupMotor.new(Component, InitialValues, UseImplicitConnections)
 	self[CompleteIndex] = true
 	self[MotorsIndex] = {}
 
-	for Key, Value in pairs(InitialValues) do
+	for Key, Value in next, InitialValues do
 		self[MotorsIndex][Key] = ToMotor(Component, Value)
 	end
 

@@ -31,15 +31,15 @@ local SingleMotor = require(script.SingleMotor)
 local Spring = require(script.Spring)
 local Utility = require(script.Utility)
 
-local HeliumAnimator = {}
+local FlipperHelium = {}
 
-HeliumAnimator.GroupMotor = GroupMotor
-HeliumAnimator.ImpulseSpring = ImpulseSpring
-HeliumAnimator.Instant = Instant
-HeliumAnimator.IsMotor = IsMotor
-HeliumAnimator.Linear = Linear
-HeliumAnimator.SingleMotor = SingleMotor
-HeliumAnimator.Spring = Spring
-HeliumAnimator.Utility = Utility
+FlipperHelium.GroupMotor = GroupMotor
+FlipperHelium.ImpulseSpring = ImpulseSpring
+FlipperHelium.Instant = Instant
+FlipperHelium.IsMotor = IsMotor
+FlipperHelium.Linear = Linear
+FlipperHelium.SingleMotor = SingleMotor
+FlipperHelium.Spring = Spring
+FlipperHelium.Utility = Utility
 
-return HeliumAnimator
+return FlipperHelium

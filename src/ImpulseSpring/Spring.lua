@@ -89,8 +89,7 @@ function Spring.new(initial)
 	}, Spring)
 end
 
-local function PositionVelocity(this, DeltaTime: number)
-	local self = this
+local function PositionVelocity(self, DeltaTime: number)
 	local p0 = self._position0
 	local v0 = self._velocity0
 	local p1 = self._target
@@ -126,14 +125,6 @@ local function PositionVelocity(this, DeltaTime: number)
 
 	return a0 * p0 + a1 * p1 + a2 * v0, b0 * p0 + b1 * p1 + b2 * v0
 end
-
--- local Multithreader_Runner_Run = Multithreader.Runner.Run
-
--- local function BasePositionVelocity(self, DeltaTime: number)
--- 	return Multithreader_Runner_Run(Utility, "PositionVelocity", self, DeltaTime)
--- end
-
--- local PositionVelocity = Spy.Benchmark(BasePositionVelocity, "PositionVelocity")
 
 --- Impulse the spring with a change in velocity
 -- @param velocity The velocity to impulse with

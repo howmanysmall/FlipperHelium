@@ -2,7 +2,7 @@ local Utility = {}
 
 function Utility.BlendAlpha(AlphaValues: {[any]: number}): number
 	local Alpha = 0
-	for _, Value in pairs(AlphaValues) do
+	for _, Value in next, AlphaValues do
 		Alpha += (1 - Alpha) * Value
 	end
 

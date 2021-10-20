@@ -51,11 +51,12 @@ end
 
 -- Connection class
 local Connection = {}
+Connection.ClassName = "Connection"
 Connection.__index = Connection
 
 function Connection.new(signal, fn)
 	return setmetatable({
-		_connected = true;
+		Connected = true;
 		_signal = signal;
 		_fn = fn;
 		_next = false;
@@ -63,8 +64,11 @@ function Connection.new(signal, fn)
 end
 
 function Connection:Disconnect()
-	assert(self._connected, "Can't disconnect a connection twice.")
-	self._connected = false
+	if not self.Connected then
+		return
+	end
+
+	self.Connected = false
 
 	-- Unhook the node, but DON'T clear it. That way any fire calls that are
 	-- currently sitting on this node will be able to iterate forwards off of
@@ -77,6 +81,7 @@ function Connection:Disconnect()
 		while prev and prev._next ~= self do
 			prev = prev._next
 		end
+
 		if prev then
 			prev._next = self._next
 		end
@@ -86,15 +91,17 @@ end
 -- Make Connection strict
 setmetatable(Connection, {
 	__index = function(_, key)
-		error(("Attempt to get Connection::%s (not a valid member)"):format(tostring(key)), 2)
+		error(string.format("Attempt to get Connection::%s (not a valid member)", tostring(key)), 2)
 	end;
+
 	__newindex = function(_, key)
-		error(("Attempt to set Connection::%s (not a valid member)"):format(tostring(key)), 2)
+		error(string.format("Attempt to set Connection::%s (not a valid member)", tostring(key)), 2)
 	end;
 })
 
 -- Signal class
 local Signal = {}
+Signal.ClassName = "Signal"
 Signal.__index = Signal
 
 function Signal.new()
@@ -111,6 +118,7 @@ function Signal:Connect(fn)
 	else
 		self._handlerListHead = connection
 	end
+
 	return connection
 end
 
@@ -127,12 +135,14 @@ end
 function Signal:Fire(...)
 	local item = self._handlerListHead
 	while item do
-		if item._connected then
+		if item.Connected then
 			if not freeRunnerThread then
 				freeRunnerThread = coroutine.create(runEventHandlerInFreeThread)
 			end
+
 			task.spawn(freeRunnerThread, item._fn, ...)
 		end
+
 		item = item._next
 	end
 end
@@ -146,16 +156,24 @@ function Signal:Wait()
 		cn:Disconnect()
 		task.spawn(waitingCoroutine, ...)
 	end)
+
 	return coroutine.yield()
+end
+
+function Signal:Destroy()
+	self._handlerListHead = false
+	table.clear(self)
+	setmetatable(self, nil)
 end
 
 -- Make signal strict
 setmetatable(Signal, {
 	__index = function(_, key)
-		error(("Attempt to get Signal::%s (not a valid member)"):format(tostring(key)), 2)
+		error(string.format("Attempt to get Signal::%s (not a valid member)", tostring(key)), 2)
 	end;
+
 	__newindex = function(_, key)
-		error(("Attempt to set Signal::%s (not a valid member)"):format(tostring(key)), 2)
+		error(string.format("Attempt to set Signal::%s (not a valid member)", tostring(key)), 2)
 	end;
 })
 
