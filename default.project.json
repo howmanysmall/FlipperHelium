@@ -1,5 +1,5 @@
 {
-	"name": "HeliumAnimator",
+	"name": "FlipperHelium",
 	"globIgnorePaths": [],
 
 	"tree": {
@@ -7,7 +7,7 @@
 		"ReplicatedStorage": {
 			"$className": "ReplicatedStorage",
 			"$ignoreUnknownInstances": true,
-			"HeliumAnimator": {
+			"FlipperHelium": {
 				"$ignoreUnknownInstances": true,
 				"$path": "src"
 			}

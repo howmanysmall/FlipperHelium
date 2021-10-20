@@ -1,4 +1,4 @@
-# HeliumAnimator
+# FlipperHelium
 
 Based on [Flipper](https://github.com/Reselim/Flipper).
 
@@ -12,7 +12,7 @@ Based on [Flipper](https://github.com/Reselim/Flipper).
 ```Lua
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Helium = require(ReplicatedStorage.Vendor.Helium)
-local HeliumAnimator = require(ReplicatedStorage.Vendor.HeliumAnimator)
+local FlipperHelium = require(ReplicatedStorage.Vendor.FlipperHelium)
 
 local AnimatorComponent = Helium.Component.Extend("AnimatorComponent")
 
@@ -21,7 +21,7 @@ local GOAL_SIZE = UDim2.fromOffset(80, 80)
 
 function AnimatorComponent:Constructor(Parent: Instance)
 	self.Alpha = 0
-	self.Motor = self.Janitor:Add(HeliumAnimator.SingleMotor.new(self, 0), "Destroy")
+	self.Motor = self.Janitor:Add(FlipperHelium.SingleMotor.new(self, 0), "Destroy")
 
 	self.Janitor:Add(self.Motor:UpdateComponent(function(Value: number)
 		self.Alpha = Value
@@ -35,7 +35,7 @@ function AnimatorComponent:Constructor(Parent: Instance)
 
 	self.Janitor:Add(TextButton.InputBegan:Connect(function(InputObject: InputObject)
 		if InputObject.UserInputType == Enum.UserInputType.MouseButton1 then
-			self.Motor:SetGoal(HeliumAnimator.Spring.new(1, {
+			self.Motor:SetGoal(FlipperHelium.Spring.new(1, {
 				DampingRatio = 1;
 				Frequency = 5;
 			}))
@@ -44,7 +44,7 @@ function AnimatorComponent:Constructor(Parent: Instance)
 
 	self.Janitor:Add(TextButton.InputEnded:Connect(function(InputObject: InputObject)
 		if InputObject.UserInputType == Enum.UserInputType.MouseButton1 then
-			self.Motor:SetGoal(HeliumAnimator.Spring.new(0, {
+			self.Motor:SetGoal(FlipperHelium.Spring.new(0, {
 				DampingRatio = 0.75;
 				Frequency = 4;
 			}))
