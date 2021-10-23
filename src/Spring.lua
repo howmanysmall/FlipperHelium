@@ -26,10 +26,6 @@ local EPS = 0.0001
 local POSITION_THRESHOLD = 0.001
 local VELOCITY_THRESHOLD = 0.001
 
-local DampingRatioIndex = newproxy(false)
-local FrequencyIndex = newproxy(false)
-local TargetValueIndex = newproxy(false)
-
 local Spring = {}
 Spring.ClassName = "Spring"
 Spring.__index = Spring
@@ -44,9 +40,9 @@ function Spring:Step(State, DeltaTime)
 	-- github.com/Fraktality/Spring
 	-- Distributed under the MIT license
 
-	local DampingRatio = self[DampingRatioIndex]
-	local Frequency = self[FrequencyIndex] * 2 * math.pi
-	local Goal = self[TargetValueIndex]
+	local DampingRatio = self._DampingRatio
+	local Frequency = self._Frequency * 2 * math.pi
+	local Goal = self._TargetValue
 	local Position0 = State.Value
 	local Velocity0 = State.Velocity or 0
 
@@ -135,9 +131,9 @@ function Spring.new(TargetValue, PossibleOptions: IOptions?)
 	local Options = PossibleOptions or {}
 
 	return setmetatable({
-		[DampingRatioIndex] = Options.DampingRatio or 1;
-		[FrequencyIndex] = Options.Frequency or 4;
-		[TargetValueIndex] = TargetValue;
+		_DampingRatio = Options.DampingRatio or 1;
+		_Frequency = Options.Frequency or 4;
+		_TargetValue = TargetValue;
 	}, Spring)
 end
 

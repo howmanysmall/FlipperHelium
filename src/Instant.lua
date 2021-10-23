@@ -22,8 +22,6 @@
 
 -- Adapted for Helium by HowManySmall.
 
-local TargetValueIndex = newproxy(false)
-
 local Instant = {}
 Instant.ClassName = "Instant"
 Instant.__index = Instant
@@ -31,7 +29,7 @@ Instant.__index = Instant
 function Instant:Step()
 	return {
 		Complete = true;
-		Value = self[TargetValueIndex];
+		Value = self._TargetValue;
 	}
 end
 
@@ -41,7 +39,7 @@ end
 
 function Instant.new(TargetValue)
 	return setmetatable({
-		[TargetValueIndex] = TargetValue;
+		_TargetValue = TargetValue;
 	}, Instant)
 end
 

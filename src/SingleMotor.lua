@@ -23,49 +23,42 @@
 -- Adapted for Helium by HowManySmall.
 
 local BaseMotor = require(script.Parent.BaseMotor)
-local Shared = require(script.Parent.Shared)
-
-local GoalIndex = newproxy(false)
-local OnCompleteIndex = Shared.OnCompleteIndex
-local OnStepIndex = Shared.OnStepIndex
-local StateIndex = newproxy(false)
-local UseImplicitConnectionsIndex = newproxy(false)
 
 local SingleMotor = setmetatable({}, BaseMotor)
 SingleMotor.ClassName = "SingleMotor"
 SingleMotor.__index = SingleMotor
 
 function SingleMotor:Step(DeltaTime)
-	local State = self[StateIndex]
+	local State = self._State
 	if State.Complete then
 		return true
 	end
 
-	local NewState = self[GoalIndex]:Step(State, DeltaTime)
+	local NewState = self._Goal:Step(State, DeltaTime)
 
-	self[StateIndex] = NewState
-	self[OnStepIndex]:Fire(NewState.Value)
+	self._State = NewState
+	self._OnStep:Fire(NewState.Value)
 
 	if NewState.Complete then
-		if self[UseImplicitConnectionsIndex] then
+		if self._UseImplicitConnections then
 			self:Stop()
 		end
 
-		self[OnCompleteIndex]:Fire()
+		self._OnComplete:Fire()
 	end
 
 	return NewState.Complete
 end
 
 function SingleMotor:GetValue()
-	return self[StateIndex].Value
+	return self._State.Value
 end
 
 function SingleMotor:SetGoal(Goal)
-	self[StateIndex].Complete = false
-	self[GoalIndex] = Goal
+	self._State.Complete = false
+	self._Goal = Goal
 
-	if self[UseImplicitConnectionsIndex] then
+	if self._UseImplicitConnections then
 		self:Start()
 	end
 
@@ -83,13 +76,13 @@ function SingleMotor.new(Component, InitialValue, UseImplicitConnections)
 	local self = setmetatable(BaseMotor.new(Component), SingleMotor)
 
 	if UseImplicitConnections ~= nil then
-		self[UseImplicitConnectionsIndex] = UseImplicitConnections
+		self._UseImplicitConnections = UseImplicitConnections
 	else
-		self[UseImplicitConnectionsIndex] = true
+		self._UseImplicitConnections = true
 	end
 
-	self[GoalIndex] = nil
-	self[StateIndex] = {
+	self._Goal = nil
+	self._State = {
 		Complete = true;
 		Value = InitialValue;
 	}

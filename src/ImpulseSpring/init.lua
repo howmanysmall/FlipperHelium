@@ -6,8 +6,6 @@ local ImpulseSpring = {}
 ImpulseSpring.ClassName = "ImpulseSpring"
 ImpulseSpring.__index = ImpulseSpring
 
-local SpringIndex = newproxy(false)
-
 export type IOptions = {
 	Damper: number,
 	Position: number,
@@ -16,7 +14,7 @@ export type IOptions = {
 }
 
 function ImpulseSpring:Step(State, DeltaTime: number)
-	local LocalSpring = self[SpringIndex]:Impulse(State.velocity or 0, DeltaTime)
+	local LocalSpring = self._Spring:Impulse(State.velocity or 0, DeltaTime)
 
 	local Goal = LocalSpring:GetTarget(DeltaTime)
 	local Velocity1 = LocalSpring:GetVelocity(DeltaTime)
@@ -40,7 +38,7 @@ function ImpulseSpring.new(TargetValue, PossibleOptions: IOptions?)
 
 	-- stylua: ignore
 	return setmetatable({
-		[SpringIndex] = Spring.new(TargetValue)
+		_Spring = Spring.new(TargetValue)
 			:SetTarget(TargetValue, 0)
 			:SetDamper(Options.Damper or 1, 0)
 			:SetPosition(TargetValue, 0)

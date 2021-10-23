@@ -24,40 +24,30 @@
 
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
-local Shared = require(script.Parent.Shared)
 local Signal = require(script.Parent.Signal)
 
 local Noop = function() end
-
-local ConnectionIndex = newproxy(false)
-local ComponentIndex = newproxy(false)
-local OnCompleteIndex = Shared.OnCompleteIndex
-local OnStepIndex = Shared.OnStepIndex
 
 local BaseMotor = {}
 BaseMotor.ClassName = "BaseMotor"
 BaseMotor.__index = BaseMotor
 
 function BaseMotor:OnStep(Function)
-	return self[OnStepIndex]:Connect(Function)
+	return self._OnStep:Connect(Function)
 end
 
 function BaseMotor:OnComplete(Function)
-	return self[OnCompleteIndex]:Connect(Function)
+	return self._OnComplete:Connect(Function)
 end
 
 function BaseMotor:UpdateComponent(ApplyFunction)
-	local Component = self[ComponentIndex]
-	local QueueRedraw = Component.QueueRedraw
+	local Component = self._Component
 
-	return self[OnStepIndex]:Connect(function(Value)
+	return self._OnStep:Connect(function(Value)
 		ApplyFunction(Value, Component)
-		QueueRedraw()
+		Component.QueueRedraw()
 	end)
 end
-
-local Guid0Index = newproxy(false)
-local Guid1Index = newproxy(false)
 
 local RenderStepTwiceEvent = {}
 RenderStepTwiceEvent.Connected = true
@@ -66,8 +56,8 @@ RenderStepTwiceEvent.__index = RenderStepTwiceEvent
 function RenderStepTwiceEvent:Disconnect()
 	if self.Connected then
 		self.Connected = false
-		RunService:UnbindFromRenderStep(self[Guid0Index])
-		RunService:UnbindFromRenderStep(self[Guid1Index])
+		RunService:UnbindFromRenderStep(self._Guid0)
+		RunService:UnbindFromRenderStep(self._Guid1)
 	end
 end
 
@@ -87,8 +77,8 @@ function RenderStepTwice:Connect(Function)
 	RunService:BindToRenderStep(Guid1, Enum.RenderPriority.Last.Value + 2, Function)
 
 	return setmetatable({
-		[Guid0Index] = Guid0;
-		[Guid1Index] = Guid1;
+		_Guid0 = Guid0;
+		_Guid1 = Guid1;
 	}, RenderStepTwiceEvent)
 end
 
@@ -108,11 +98,11 @@ local EVENTS_MAP = {
 }
 
 function BaseMotor:Start()
-	if not self[ConnectionIndex] then
-		local Component = self[ComponentIndex]
+	if not self._Connection then
+		local Component = self._Component
 		local GetEvent = EVENTS_MAP[Component.RedrawBinding.Value] or GetHeartbeat
 
-		self[ConnectionIndex] = GetEvent():Connect(function(DeltaTime)
+		self._Connection = GetEvent():Connect(function(DeltaTime)
 			self:Step(DeltaTime)
 		end)
 	end
@@ -121,9 +111,9 @@ function BaseMotor:Start()
 end
 
 function BaseMotor:Stop()
-	if self[ConnectionIndex] then
-		self[ConnectionIndex]:Disconnect()
-		self[ConnectionIndex] = nil
+	if self._Connection then
+		self._Connection:Disconnect()
+		self._Connection = nil
 	end
 
 	return self
@@ -145,10 +135,10 @@ end
 
 function BaseMotor.new(Component)
 	return setmetatable({
-		[ComponentIndex] = Component;
-		[ConnectionIndex] = nil;
-		[OnCompleteIndex] = Signal.new();
-		[OnStepIndex] = Signal.new();
+		_Component = Component;
+		_Connection = nil;
+		_OnComplete = Signal.new();
+		_OnStep = Signal.new();
 	}, BaseMotor)
 end
 

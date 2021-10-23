@@ -24,14 +24,7 @@
 
 local BaseMotor = require(script.Parent.BaseMotor)
 local IsMotor = require(script.Parent.IsMotor)
-local Shared = require(script.Parent.Shared)
 local SingleMotor = require(script.Parent.SingleMotor)
-
-local CompleteIndex = newproxy(false)
-local MotorsIndex = newproxy(false)
-local OnCompleteIndex = Shared.OnCompleteIndex
-local OnStepIndex = Shared.OnStepIndex
-local UseImplicitConnectionsIndex = newproxy(false)
 
 local GroupMotor = setmetatable({}, BaseMotor)
 GroupMotor.ClassName = "GroupMotor"
@@ -54,13 +47,13 @@ local function ToMotor(Component, Value)
 end
 
 function GroupMotor:Step(DeltaTime)
-	if self[CompleteIndex] then
+	if self._Complete then
 		return true
 	end
 
 	local AllMotorsComplete = true
 
-	for _, Motor in next, self[MotorsIndex] do
+	for _, Motor in next, self._Motors do
 		local Complete = Motor:Step(DeltaTime)
 		if not Complete then
 			-- If any of the sub-motors are incomplete, the group motor will not be complete either
@@ -68,25 +61,25 @@ function GroupMotor:Step(DeltaTime)
 		end
 	end
 
-	self[OnStepIndex]:Fire(self:GetValue())
+	self._OnStep:Fire(self:GetValue())
 
 	if AllMotorsComplete then
-		if self[UseImplicitConnectionsIndex] then
+		if self._UseImplicitConnections then
 			self:Stop()
 		end
 
-		self[CompleteIndex] = true
-		self[OnCompleteIndex]:Fire()
+		self._Complete = true
+		self._OnComplete:Fire()
 	end
 
 	return AllMotorsComplete
 end
 
 function GroupMotor:SetGoal(Goals)
-	self[CompleteIndex] = false
+	self._Complete = false
 
 	for Key, Goal in next, Goals do
-		local Motor = self[MotorsIndex][Key]
+		local Motor = self._Motors[Key]
 		if not Motor then
 			error(string.format("Unknown motor for key %s", tostring(Key)))
 		end
@@ -94,7 +87,7 @@ function GroupMotor:SetGoal(Goals)
 		Motor:SetGoal(Goal)
 	end
 
-	if self[UseImplicitConnectionsIndex] then
+	if self._UseImplicitConnections then
 		self:Start()
 	end
 
@@ -104,7 +97,7 @@ end
 function GroupMotor:GetValue()
 	local Values = {}
 
-	for Key, Motor in next, self[MotorsIndex] do
+	for Key, Motor in next, self._Motors do
 		Values[Key] = Motor:GetValue()
 	end
 
@@ -122,16 +115,16 @@ function GroupMotor.new(Component, InitialValues, UseImplicitConnections)
 	local self = setmetatable(BaseMotor.new(Component), GroupMotor)
 
 	if UseImplicitConnections ~= nil then
-		self[UseImplicitConnectionsIndex] = UseImplicitConnections
+		self._UseImplicitConnections = UseImplicitConnections
 	else
-		self[UseImplicitConnectionsIndex] = true
+		self._UseImplicitConnections = true
 	end
 
-	self[CompleteIndex] = true
-	self[MotorsIndex] = {}
+	self._Complete = true
+	self._Motors = {}
 
 	for Key, Value in next, InitialValues do
-		self[MotorsIndex][Key] = ToMotor(Component, Value)
+		self._Motors[Key] = ToMotor(Component, Value)
 	end
 
 	return self

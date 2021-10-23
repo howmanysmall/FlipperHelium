@@ -22,9 +22,6 @@
 
 -- Adapted for Helium by HowManySmall.
 
-local TargetValueIndex = newproxy(false)
-local VelocityIndex = newproxy(false)
-
 local Linear = {}
 Linear.ClassName = "Linear"
 Linear.__index = Linear
@@ -33,8 +30,8 @@ export type IOptions = {Velocity: number?}
 
 function Linear:Step(State, DeltaTime: number)
 	local Position = State.Value
-	local Velocity = self[VelocityIndex]
-	local Goal = self[TargetValueIndex]
+	local Velocity = self._Velocity
+	local Goal = self._TargetValue
 
 	local DeltaPosition = DeltaTime * Velocity
 	local Complete = DeltaPosition >= math.abs(Goal - Position)
@@ -61,8 +58,8 @@ function Linear.new(TargetValue, PossibleOptions: IOptions?)
 	local Options = PossibleOptions or {}
 
 	return setmetatable({
-		[TargetValueIndex] = TargetValue;
-		[VelocityIndex] = Options.Velocity or 1;
+		_TargetValue = TargetValue;
+		_Velocity = Options.Velocity or 1;
 	}, Linear)
 end
 
